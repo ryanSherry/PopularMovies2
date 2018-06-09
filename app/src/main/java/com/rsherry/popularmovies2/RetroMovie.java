@@ -2,9 +2,11 @@ package com.rsherry.popularmovies2;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class RetroMovie {
     @SerializedName("id")
-    private String mId;
+    private int mId;
     @SerializedName("title")
     private String mTitle;
     @SerializedName("release_date")
@@ -19,22 +21,18 @@ public class RetroMovie {
     private double mVoteAverage;
     public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
 
-    public RetroMovie(String id, String title, String releaseDate, String overview, String posterPath, String backdrop_path, double voteAverage) {
+    public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage) {
         mId = id;
         mTitle = title;
         mReleaseDate = releaseDate;
         mOverview = overview;
-        mPosterPath = posterPath;
-        mBackdrop_path = backdrop_path;
+        mPosterPath = BASE_IMAGE_URL + posterPath;
+        mBackdrop_path = BASE_IMAGE_URL + backdropPath;
         mVoteAverage = voteAverage;
     }
 
-    public String getId() {
+    public int getId() {
         return mId;
-    }
-
-    public void setId(String id) {
-        mId = id;
     }
 
     public String getTitle() {
@@ -62,19 +60,19 @@ public class RetroMovie {
     }
 
     public String getPosterPath() {
-        return mPosterPath;
+        return BASE_IMAGE_URL + mPosterPath;
     }
 
     public void setPosterPath(String posterPath) {
-        mPosterPath = BASE_IMAGE_URL + posterPath;
+        mPosterPath = posterPath;
     }
 
     public String getBackdrop_path() {
-        return mBackdrop_path;
+        return BASE_IMAGE_URL + mBackdrop_path;
     }
 
     public void setBackdrop_path(String backdrop_path) {
-        mBackdrop_path = BASE_IMAGE_URL + backdrop_path;
+        mBackdrop_path = backdrop_path;
     }
 
     public double getVoteAverage() {
@@ -84,4 +82,5 @@ public class RetroMovie {
     public void setVoteAverage(double voteAverage) {
         mVoteAverage = voteAverage;
     }
+
 }

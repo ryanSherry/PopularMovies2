@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Movie;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +43,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         Uri uri = Uri.parse(movie.getPosterPath());
 
         Picasso.get().load(uri).into(holder.mMoviePoster);
-        //picasso magic here
         //onClick fun here
     }
 
@@ -52,10 +52,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.moviePoster) ImageView mMoviePoster;
 
-        public MovieViewHolder(View itemView) {
+        MovieViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
         }
