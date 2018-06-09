@@ -10,5 +10,5 @@ public interface GetEndpointData {
     retrofit2.Call<RetroMovieResults> getMoviesByPopularity(@Query("api_key") String api_key);
 
     @GET("movie/top_rated")
-    retrofit2.Call<List<RetroMovieResults>> getMoviesByRating (@Query("api_key") String api_key);
+    retrofit2.Call<RetroMovieResults> getMoviesByRating (@Query("api_key") String api_key);
 }

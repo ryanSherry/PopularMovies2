@@ -1,10 +1,13 @@
 package com.rsherry.popularmovies2;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class RetroMovie {
+public class RetroMovie implements Parcelable {
     @SerializedName("id")
     private int mId;
     @SerializedName("title")
@@ -83,4 +86,41 @@ public class RetroMovie {
         mVoteAverage = voteAverage;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mTitle);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mOverview);
+        dest.writeString(mPosterPath);
+        dest.writeString(mBackdrop_path);
+        dest.writeDouble(mVoteAverage);
+    }
+
+    private RetroMovie (Parcel in) {
+        mId = in.readInt();
+        mTitle = in.readString();
+        mReleaseDate = in.readString();
+        mOverview = in.readString();
+        mPosterPath = in.readString();
+        mBackdrop_path = in.readString();
+        mVoteAverage = in.readDouble();
+    }
+
+    public static final Creator<RetroMovie> CREATOR = new Creator<RetroMovie>() {
+        @Override
+        public RetroMovie createFromParcel(Parcel source) {
+            return new RetroMovie(source);
+        }
+
+        @Override
+        public RetroMovie[] newArray(int size) {
+            return new RetroMovie[size];
+        }
+    };
 }
