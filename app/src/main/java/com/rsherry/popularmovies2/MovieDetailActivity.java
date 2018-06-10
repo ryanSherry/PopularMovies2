@@ -7,24 +7,32 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MovieDetailActivity extends AppCompatActivity {
+    private List<RetroTrailer> mTrailers;
+    private List<RetroReview> mReviews;
+    private static final String API_KEY = ApiKey.getApiKey();
 
     @BindView(R.id.detailMoviePoster) ImageView mMoviePoster;
     @BindView(R.id.movieTitle) TextView mTitle;
     @BindView(R.id.releaseDate) TextView mReleaseDate;
     @BindView(R.id.plotSynopsis) TextView mPlotSynopsis;
-    @BindView(R.id.ratingBar)
-    RatingBar mRating;
+    @BindView(R.id.ratingBar) RatingBar mRating;
 
 
     @Override
@@ -38,6 +46,38 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         Uri uri = Uri.parse(movie.getBackdrop_path());
         Picasso.get().load(uri).into(mMoviePoster);
+
+        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
+        Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(),API_KEY);
+        trailersCall.enqueue(new Callback<RetroTrailerResults>() {
+            @Override
+            public void onResponse(Call<RetroTrailerResults> call, Response<RetroTrailerResults> response) {
+                mTrailers = response.body().getTrailers();
+            }
+
+            @Override
+            public void onFailure(Call<RetroTrailerResults> call, Throwable t) {
+                if (t instanceof IOException) {
+                    Toast.makeText(getApplicationContext(),"network failure",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(),"conversion issue",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        Call<RetroReviewResults> reviewsCall = service.getMovieReviews(movie.getId(),API_KEY);
+        reviewsCall.enqueue(new Callback<RetroReviewResults>() {
+            @Override
+            public void onResponse(Call<RetroReviewResults> call, Response<RetroReviewResults> response) {
+                mReviews = response.body().getReviews();
+            }
+
+            @Override
+            public void onFailure(Call<RetroReviewResults> call, Throwable t) {
+
+            }
+        });
 
         populateUI(movie);
 

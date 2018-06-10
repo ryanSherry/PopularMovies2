@@ -22,7 +22,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.ListItemClickListener {
     private MovieAdapter mAdapter;
-    public static final String API_KEY = ApiKey.getApiKey();
+    private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
     List<RetroMovie> mMovies;
 
