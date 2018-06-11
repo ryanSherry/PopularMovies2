@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
                 mMovies = response.body().getResults();
                 generateMovieList(mMovies);
                 mAdapter.notifyDataSetChanged();
-                Toast.makeText(getApplicationContext(),"done",Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -82,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
             public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
                 mMovies = response.body().getResults();
                 generateMovieList(mMovies);
-                Toast.makeText(getApplicationContext(),"done",Toast.LENGTH_LONG).show();
             }
 
             @Override

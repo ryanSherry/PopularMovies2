@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -24,9 +27,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieDetailActivity extends AppCompatActivity {
+    private static final String API_KEY = ApiKey.getApiKey();
+    private TrailerAdapter mAdapter;
+    RecyclerView mRecyclerView;
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
-    private static final String API_KEY = ApiKey.getApiKey();
 
     @BindView(R.id.detailMoviePoster) ImageView mMoviePoster;
     @BindView(R.id.movieTitle) TextView mTitle;
@@ -53,6 +58,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RetroTrailerResults> call, Response<RetroTrailerResults> response) {
                 mTrailers = response.body().getTrailers();
+                generateTrailerList(mTrailers);
             }
 
             @Override
@@ -89,6 +95,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         mReleaseDate.setText(dateFormatter(movie.getReleaseDate()));
         mPlotSynopsis.setText(movie.getOverview());
         mRating.setRating((float) movie.getVoteAverage()/2);
+    }
+
+    private void generateTrailerList(List<RetroTrailer> list) {
+        mRecyclerView = findViewById(R.id.trailerRecyclerView);
+        mAdapter = new TrailerAdapter(list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
     }
 
     private String dateFormatter(String date) {
