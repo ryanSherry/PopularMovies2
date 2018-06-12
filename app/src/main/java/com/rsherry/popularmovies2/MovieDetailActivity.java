@@ -28,7 +28,6 @@ import retrofit2.Response;
 
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String API_KEY = ApiKey.getApiKey();
-    private TrailerAdapter mAdapter;
     RecyclerView mRecyclerView;
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
@@ -77,11 +76,17 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RetroReviewResults> call, Response<RetroReviewResults> response) {
                 mReviews = response.body().getReviews();
+                generateReviewList(mReviews);
             }
 
             @Override
             public void onFailure(Call<RetroReviewResults> call, Throwable t) {
-
+                if (t instanceof IOException) {
+                    Toast.makeText(getApplicationContext(),"network failure",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(),"conversion issue",Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -97,13 +102,23 @@ public class MovieDetailActivity extends AppCompatActivity {
         mRating.setRating((float) movie.getVoteAverage()/2);
     }
 
-    private void generateTrailerList(List<RetroTrailer> list) {
+    private void generateTrailerList(List<RetroTrailer> trailers) {
         mRecyclerView = findViewById(R.id.trailerRecyclerView);
-        mAdapter = new TrailerAdapter(list);
+        TrailerAdapter adapter = new TrailerAdapter(trailers);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
+        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(),DividerItemDecoration.VERTICAL));
+        adapter.notifyDataSetChanged();
+    }
+
+    private void generateReviewList(List<RetroReview> reviews) {
+        mRecyclerView = findViewById(R.id.reviewRecyclerView);
+        ReviewAdapter adapter = new ReviewAdapter(reviews);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     private String dateFormatter(String date) {

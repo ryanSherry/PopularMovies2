@@ -18,7 +18,7 @@ public class RetroReview {
     }
 
     public String getAuthor() {
-        return mAuthor;
+        return mAuthor + " writes:";
     }
 
     public void setAuthor(String author) {
