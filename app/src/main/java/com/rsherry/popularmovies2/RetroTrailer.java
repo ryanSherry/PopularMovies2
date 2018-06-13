@@ -13,6 +13,7 @@ public class RetroTrailer {
     private String mSite;
     @SerializedName("type")
     private String mType;
+    public static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
     public RetroTrailer(String id, String key, String name, String site, String type) {
         mId = id;
@@ -60,6 +61,10 @@ public class RetroTrailer {
 
     public void setType(String type) {
         mType = type;
+    }
+
+    public String getUrlString(String url) {
+        return YOUTUBE_BASE_URL + url;
     }
 
 }

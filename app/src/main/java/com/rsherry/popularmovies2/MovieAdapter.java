@@ -18,13 +18,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> implements ListItemClickListener {
     List<RetroMovie> mMovies;
     final private ListItemClickListener mOnClickListener;
-
-    public interface ListItemClickListener {
-        void onClickListItem(int clickedItemIndex);
-    }
 
     MovieAdapter(List<RetroMovie> movies,ListItemClickListener listener) {
         mMovies = movies;
@@ -56,6 +52,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return mMovies.size();
     }
 
+    @Override
+    public void onListItemClick(int clickedItemIndex) {
+
+    }
+
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.moviePoster) ImageView mMoviePoster;
 
@@ -68,7 +69,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            mOnClickListener.onClickListItem(clickedPosition);
+            mOnClickListener.onListItemClick(clickedPosition);
         }
     }
 }

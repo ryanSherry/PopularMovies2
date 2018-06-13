@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements ListItemClickListener {
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
     private List<RetroTrailer> mTrailers;
@@ -104,7 +104,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void generateTrailerList(List<RetroTrailer> trailers) {
         mRecyclerView = findViewById(R.id.trailerRecyclerView);
-        TrailerAdapter adapter = new TrailerAdapter(trailers);
+        TrailerAdapter adapter = new TrailerAdapter(trailers,this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(adapter);
@@ -131,5 +131,20 @@ public class MovieDetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return (String) android.text.format.DateFormat.format("MMMM yyyy",newDate);
+    }
+
+    @Override
+    public void onListItemClick(int clickedItemIndex) {
+
+        RetroTrailer trailer = mTrailers.get(clickedItemIndex);
+        String youtubeKey = trailer.getKey();
+        String url = trailer.getUrlString(youtubeKey);
+        Uri webpage = Uri.parse(url);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+
+        if(intent.resolveActivity(getPackageManager()) != null) {
+            this.startActivity(intent);
+        }
     }
 }

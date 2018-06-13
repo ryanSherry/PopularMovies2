@@ -20,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.ListItemClickListener {
+public class MainActivity extends AppCompatActivity implements ListItemClickListener {
     private MovieAdapter mAdapter;
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
     }
 
     @Override
-    public void onClickListItem(int clickedItemIndex) {
+    public void onListItemClick(int clickedItemIndex) {
         final RetroMovie movie = mMovies.get(clickedItemIndex);
         Intent intent = new Intent(this,MovieDetailActivity.class);
         intent.putExtra("MOVIE",movie);

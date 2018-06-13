@@ -13,11 +13,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> {
+public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> implements ListItemClickListener {
     List<RetroTrailer> mTrailers;
+    final private ListItemClickListener mOnClickListener;
 
-    public TrailerAdapter(List<RetroTrailer> trailers) {
+    public TrailerAdapter(List<RetroTrailer> trailers, ListItemClickListener listener) {
         mTrailers = trailers;
+        mOnClickListener = listener;
     }
 
     @NonNull
@@ -41,7 +43,12 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         return mTrailers.size();
     }
 
-    public class TrailerViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public void onListItemClick(int clickedItemIndex) {
+
+    }
+
+    public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         @BindView(R.id.playTrailer) ImageView mPlayTrailer;
         @BindView(R.id.trailerTitle) TextView mTrailerTitle;
@@ -49,6 +56,12 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         public TrailerViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mOnClickListener.onListItemClick(getAdapterPosition());
         }
     }
 }
