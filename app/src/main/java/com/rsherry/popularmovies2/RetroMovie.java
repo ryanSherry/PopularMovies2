@@ -1,5 +1,8 @@
 package com.rsherry.popularmovies2;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,23 +10,39 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+@Entity(tableName = "favorite_movies")
 public class RetroMovie implements Parcelable {
+    @PrimaryKey
     @SerializedName("id")
     private int mId;
+
     @SerializedName("title")
     private String mTitle;
+
+    @Ignore
     @SerializedName("release_date")
     private String mReleaseDate;
+
+    @Ignore
     @SerializedName("overview")
     private String mOverview;
+
+    @Ignore
     @SerializedName("poster_path")
     private String mPosterPath;
+
+    @Ignore
     @SerializedName("backdrop_path")
     private String mBackdrop_path;
+
+    @Ignore
     @SerializedName("vote_average")
     private double mVoteAverage;
+
+    @Ignore
     public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
 
+    @Ignore
     public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage) {
         mId = id;
         mTitle = title;
@@ -32,6 +51,11 @@ public class RetroMovie implements Parcelable {
         mPosterPath = BASE_IMAGE_URL + posterPath;
         mBackdrop_path = BASE_IMAGE_URL + backdropPath;
         mVoteAverage = voteAverage;
+    }
+
+    public RetroMovie(int id, String title) {
+        mId = id;
+        mTitle = title;
     }
 
     public int getId() {
