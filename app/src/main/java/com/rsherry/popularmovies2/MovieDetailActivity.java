@@ -2,16 +2,20 @@ package com.rsherry.popularmovies2;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import com.rsherry.popularmovies2.database.AppDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -31,12 +35,17 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     RecyclerView mRecyclerView;
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
+    private RetroMovie mMovie;
+
+    // Member variable for the Database
+    private AppDatabase mDb;
 
     @BindView(R.id.detailMoviePoster) ImageView mMoviePoster;
     @BindView(R.id.movieTitle) TextView mTitle;
     @BindView(R.id.releaseDate) TextView mReleaseDate;
     @BindView(R.id.plotSynopsis) TextView mPlotSynopsis;
     @BindView(R.id.ratingBar) RatingBar mRating;
+    @BindView(R.id.favoriteButton) ToggleButton mFavoriteButton;
 
 
     @Override
@@ -47,9 +56,12 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
         Intent intent = getIntent();
         RetroMovie movie = intent.getParcelableExtra("MOVIE");
+        mMovie = movie;
 
         Uri uri = Uri.parse(movie.getBackdrop_path());
         Picasso.get().load(uri).into(mMoviePoster);
+
+        mDb = AppDatabase.getsInstance(getApplicationContext());
 
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
         Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(),API_KEY);
@@ -147,4 +159,24 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             this.startActivity(intent);
         }
     }
-}
+
+    // Saves movie as a favorite
+
+    public void onSaveFavoriteButtonClicked() {
+        int movieId = mMovie.getId();
+        String movieTitle = mMovie.getTitle();
+
+        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle);
+
+        mDb.movieFavoritesDao().insertFavoriteMovie(favoriteMovie);
+
+    }
+
+    public void toggleFavoriteButton(ToggleButton toggleButton) {
+        if(toggleButton.isChecked()) {
+            //save favorite
+        } else {
+            //remove favorite
+        }
+        }
+    }
