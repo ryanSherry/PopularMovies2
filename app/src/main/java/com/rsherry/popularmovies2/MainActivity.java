@@ -1,21 +1,24 @@
 package com.rsherry.popularmovies2;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.rsherry.popularmovies2.database.AppDatabase;
+import com.rsherry.popularmovies2.model.RetroMovieResults;
+import com.rsherry.popularmovies2.networking.GetEndpointData;
+import com.rsherry.popularmovies2.networking.RetrofitClentInstance;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,11 +28,14 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
     List<RetroMovie> mMovies;
+    AppDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mDb = AppDatabase.getsInstance(getApplicationContext());
 
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
         Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
@@ -69,8 +75,25 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.sort_popular:
                 sortByMostPopular();
                 break;
+            case R.id.view_favorites:
+                viewFavorites();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void viewFavorites() {
+        List<RetroMovie> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
+        List<RetroMovie> favoriteMoviesComplete = new ArrayList<>();
+        for(RetroMovie movie : favoriteMovies) {
+            RetroMovie isFavMovie = movie.getFavorite(movie.getId(),mMovies);
+            if(isFavMovie != null) {
+                favoriteMoviesComplete.add(isFavMovie);
+            }
+        }
+        if (favoriteMoviesComplete.size() > 0) {
+            generateMovieList(favoriteMoviesComplete);
+        }
     }
 
     public void sortByMostPopular(){

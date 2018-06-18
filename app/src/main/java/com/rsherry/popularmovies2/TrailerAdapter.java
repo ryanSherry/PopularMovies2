@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.rsherry.popularmovies2.model.RetroTrailer;
+
 import java.util.List;
 
 import butterknife.BindView;

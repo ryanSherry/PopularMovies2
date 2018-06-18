@@ -2,7 +2,6 @@ package com.rsherry.popularmovies2;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,6 +15,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.rsherry.popularmovies2.database.AppDatabase;
+import com.rsherry.popularmovies2.model.RetroReview;
+import com.rsherry.popularmovies2.model.RetroReviewResults;
+import com.rsherry.popularmovies2.model.RetroTrailer;
+import com.rsherry.popularmovies2.model.RetroTrailerResults;
+import com.rsherry.popularmovies2.networking.GetEndpointData;
+import com.rsherry.popularmovies2.networking.RetrofitClentInstance;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -104,6 +109,13 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
         populateUI(movie);
 
+        mFavoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleFavoriteButton(mFavoriteButton);
+            }
+        });
+
     }
 
     private void populateUI(RetroMovie movie) {
@@ -162,21 +174,27 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
     // Saves movie as a favorite
 
-    public void onSaveFavoriteButtonClicked() {
+    public void saveFavorite() {
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
 
         RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle);
-
         mDb.movieFavoritesDao().insertFavoriteMovie(favoriteMovie);
+    }
 
+    public void deleteFavorite() {
+        int movieId = mMovie.getId();
+        String movieTitle = mMovie.getTitle();
+
+        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle);
+        mDb.movieFavoritesDao().deleteFavoriteMovie(favoriteMovie);
     }
 
     public void toggleFavoriteButton(ToggleButton toggleButton) {
         if(toggleButton.isChecked()) {
-            //save favorite
+            saveFavorite();
         } else {
-            //remove favorite
+            deleteFavorite();
         }
         }
     }

@@ -1,8 +1,9 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.networking;
 
-import java.util.List;
+import com.rsherry.popularmovies2.model.RetroMovieResults;
+import com.rsherry.popularmovies2.model.RetroReviewResults;
+import com.rsherry.popularmovies2.model.RetroTrailerResults;
 
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

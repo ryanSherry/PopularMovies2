@@ -8,6 +8,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = "favorite_movies")
@@ -147,4 +148,13 @@ public class RetroMovie implements Parcelable {
             return new RetroMovie[size];
         }
     };
+
+    public RetroMovie getFavorite(int id, List<RetroMovie> list) {
+        for(RetroMovie movie : list) {
+            if(movie.getId() == id) {
+                return movie;
+            }
+        }
+        return null;
+    }
 }
