@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -83,17 +84,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void viewFavorites() {
-        List<RetroMovie> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
-        List<RetroMovie> favoriteMoviesComplete = new ArrayList<>();
-        for(RetroMovie movie : favoriteMovies) {
-            RetroMovie isFavMovie = movie.getFavorite(movie.getId(),mMovies);
-            if(isFavMovie != null) {
-                favoriteMoviesComplete.add(isFavMovie);
-            }
-        }
-        if (favoriteMoviesComplete.size() > 0) {
-            generateMovieList(favoriteMoviesComplete);
-        }
+        mMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
+        generateMovieList(mMovies);
     }
 
     public void sortByMostPopular(){

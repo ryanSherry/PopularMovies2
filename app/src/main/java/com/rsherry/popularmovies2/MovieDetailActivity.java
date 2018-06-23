@@ -63,7 +63,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         RetroMovie movie = intent.getParcelableExtra("MOVIE");
         mMovie = movie;
 
-        Uri uri = Uri.parse(movie.getBackdrop_path());
+        Uri uri = Uri.parse(movie.getBackDropUrl());
         Picasso.get().load(uri).into(mMoviePoster);
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
@@ -177,16 +177,26 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     public void saveFavorite() {
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
+        String releaseDate = mMovie.getReleaseDate();
+        String overView = mMovie.getOverview();
+        String posterPath = mMovie.getPosterPath();
+        String backDropPath = mMovie.getBackdropPath();
+        double voteAverage = mMovie.getVoteAverage();
 
-        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle);
+        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
         mDb.movieFavoritesDao().insertFavoriteMovie(favoriteMovie);
     }
 
     public void deleteFavorite() {
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
+        String releaseDate = mMovie.getReleaseDate();
+        String overView = mMovie.getOverview();
+        String posterPath = mMovie.getPosterPath();
+        String backDropPath = mMovie.getBackdropPath();
+        double voteAverage = mMovie.getVoteAverage();
 
-        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle);
+        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
         mDb.movieFavoritesDao().deleteFavoriteMovie(favoriteMovie);
     }
 

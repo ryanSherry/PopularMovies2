@@ -42,7 +42,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         RetroMovie movie = mMovies.get(position);
 
-        Uri uri = Uri.parse(movie.getPosterPath());
+        Uri uri = Uri.parse(movie.getPosterUrl());
 
         Picasso.get().load(uri).into(holder.mMoviePoster);
     }

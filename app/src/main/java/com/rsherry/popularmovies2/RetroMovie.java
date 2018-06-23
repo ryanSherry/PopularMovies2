@@ -8,7 +8,6 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = "favorite_movies")
@@ -20,47 +19,40 @@ public class RetroMovie implements Parcelable {
     @SerializedName("title")
     private String mTitle;
 
-    @Ignore
     @SerializedName("release_date")
     private String mReleaseDate;
 
-    @Ignore
     @SerializedName("overview")
     private String mOverview;
 
-    @Ignore
     @SerializedName("poster_path")
     private String mPosterPath;
 
-    @Ignore
     @SerializedName("backdrop_path")
-    private String mBackdrop_path;
+    private String mBackdropPath;
 
-    @Ignore
     @SerializedName("vote_average")
     private double mVoteAverage;
 
-    @Ignore
-    public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
+    @Ignore public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
 
-    @Ignore
     public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage) {
         mId = id;
         mTitle = title;
         mReleaseDate = releaseDate;
         mOverview = overview;
-        mPosterPath = BASE_IMAGE_URL + posterPath;
-        mBackdrop_path = BASE_IMAGE_URL + backdropPath;
+        mPosterPath = posterPath;
+        mBackdropPath = backdropPath;
         mVoteAverage = voteAverage;
     }
 
-    public RetroMovie(int id, String title) {
-        mId = id;
-        mTitle = title;
-    }
 
     public int getId() {
         return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
     }
 
     public String getTitle() {
@@ -88,19 +80,31 @@ public class RetroMovie implements Parcelable {
     }
 
     public String getPosterPath() {
+        return mPosterPath;
+    }
+
+    public String getPosterUrl() {
         return BASE_IMAGE_URL + mPosterPath;
+    }
+
+    public String getBaseImageUrl() {
+        return BASE_IMAGE_URL;
     }
 
     public void setPosterPath(String posterPath) {
         mPosterPath = posterPath;
     }
 
-    public String getBackdrop_path() {
-        return BASE_IMAGE_URL + mBackdrop_path;
+    public String getBackdropPath() {
+        return mBackdropPath;
     }
 
-    public void setBackdrop_path(String backdrop_path) {
-        mBackdrop_path = backdrop_path;
+    public String getBackDropUrl() {
+        return BASE_IMAGE_URL + mBackdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        mBackdropPath = backdropPath;
     }
 
     public double getVoteAverage() {
@@ -123,7 +127,7 @@ public class RetroMovie implements Parcelable {
         dest.writeString(mReleaseDate);
         dest.writeString(mOverview);
         dest.writeString(mPosterPath);
-        dest.writeString(mBackdrop_path);
+        dest.writeString(mBackdropPath);
         dest.writeDouble(mVoteAverage);
     }
 
@@ -133,7 +137,7 @@ public class RetroMovie implements Parcelable {
         mReleaseDate = in.readString();
         mOverview = in.readString();
         mPosterPath = in.readString();
-        mBackdrop_path = in.readString();
+        mBackdropPath = in.readString();
         mVoteAverage = in.readDouble();
     }
 
@@ -149,12 +153,4 @@ public class RetroMovie implements Parcelable {
         }
     };
 
-    public RetroMovie getFavorite(int id, List<RetroMovie> list) {
-        for(RetroMovie movie : list) {
-            if(movie.getId() == id) {
-                return movie;
-            }
-        }
-        return null;
-    }
 }
