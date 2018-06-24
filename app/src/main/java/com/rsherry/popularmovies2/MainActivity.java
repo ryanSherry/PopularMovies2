@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         favoriteMovies.observe(this, new Observer<List<RetroMovie>>() {
             @Override
             public void onChanged(@Nullable List<RetroMovie> retroMovies) {
+                mMovies = retroMovies;
                 generateMovieList(retroMovies);
             }
         });
