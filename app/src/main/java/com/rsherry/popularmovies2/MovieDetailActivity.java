@@ -183,8 +183,14 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         String backDropPath = mMovie.getBackdropPath();
         double voteAverage = mMovie.getVoteAverage();
 
-        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
-        mDb.movieFavoritesDao().insertFavoriteMovie(favoriteMovie);
+        final RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
+
+        AppExecutors.getsInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb.movieFavoritesDao().insertFavoriteMovie(favoriteMovie);
+            }
+        });
     }
 
     public void deleteFavorite() {

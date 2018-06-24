@@ -1,6 +1,9 @@
 package com.rsherry.popularmovies2;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -84,8 +87,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void viewFavorites() {
-        mMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
-        generateMovieList(mMovies);
+        final LiveData<List<RetroMovie>> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
+        mMovies = favoriteMovies.getValue();
+        favoriteMovies.observe(this, new Observer<List<RetroMovie>>() {
+            @Override
+            public void onChanged(@Nullable List<RetroMovie> retroMovies) {
+                generateMovieList(retroMovies);
+            }
+        });
+
     }
 
     public void sortByMostPopular(){
