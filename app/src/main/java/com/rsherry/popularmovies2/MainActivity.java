@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private void viewFavorites() {
         final LiveData<List<RetroMovie>> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
-        mMovies = favoriteMovies.getValue();
         favoriteMovies.observe(this, new Observer<List<RetroMovie>>() {
             @Override
             public void onChanged(@Nullable List<RetroMovie> retroMovies) {
