@@ -3,6 +3,8 @@ package com.rsherry.popularmovies2;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,11 +30,15 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements ListItemClickListener {
+    private static final String SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER";
+    private static final String SAVED_MOVIE_LIST = "SAVED_MOVIE_LIST";
     private MovieAdapter mAdapter;
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager mLayoutManager;
     List<RetroMovie> mMovies;
     AppDatabase mDb;
+    Parcelable mListState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +47,20 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
+        if(savedInstanceState != null) {
+            mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
+            mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
+        }
+
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
         Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
         call.enqueue(new Callback<RetroMovieResults>() {
             @Override
             public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
-                mMovies = response.body().getResults();
+                if(mMovies == null) {
+                    mMovies = response.body().getResults();
+                    Log.i("networkcall","made a network call");
+                }
                 generateMovieList(mMovies);
                 mAdapter.notifyDataSetChanged();
             }
@@ -62,6 +76,28 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         });
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mListState = mRecyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(SAVED_LAYOUT_MANAGER, mListState);
+        outState.putParcelableArrayList(SAVED_MOVIE_LIST,((ArrayList<RetroMovie>)mMovies));
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        if(savedInstanceState != null) {
+//            mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
+//            mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
+//        }
+//        if (mListState != null) {
+//            mLayoutManager.onRestoreInstanceState(mListState);
+//        }
+        super.onRestoreInstanceState(savedInstanceState);
+        }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -136,9 +172,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private void generateMovieList(List<RetroMovie> movieList) {
         mRecyclerView = findViewById(R.id.recyclerView);
         mAdapter = new MovieAdapter(movieList,this);
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this,2);
-        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+        mLayoutManager = new GridLayoutManager(this,2);
+        if (mListState != null) {
+            mLayoutManager.onRestoreInstanceState(mListState);
+        }
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter.notifyDataSetChanged();
     }
 

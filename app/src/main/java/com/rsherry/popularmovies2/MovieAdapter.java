@@ -72,4 +72,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             mOnClickListener.onListItemClick(clickedPosition);
         }
     }
+
+    public void setMovies(List<RetroMovie> movieList) {
+        mMovies = movieList;
+    }
 }
