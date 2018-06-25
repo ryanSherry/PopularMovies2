@@ -32,13 +32,23 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements ListItemClickListener {
     private static final String SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER";
     private static final String SAVED_MOVIE_LIST = "SAVED_MOVIE_LIST";
+    private static final String SAVED_SORTING_OPTION = "SAVED_SORTING_OPTION";
     private MovieAdapter mAdapter;
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
     List<RetroMovie> mMovies;
+    List<RetroMovie> mHighestRated;
+    List<RetroMovie> mMostPopular;
     AppDatabase mDb;
     Parcelable mListState;
+
+    public enum SortingBy {
+        MOST_POPULAR, HIGHEST_RATED, FAVORITES
+    }
+
+    SortingBy mSortingBy;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,32 +60,50 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if(savedInstanceState != null) {
             mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
             mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
+            String mSortingByValue = savedInstanceState.getString(SAVED_SORTING_OPTION);
+            mSortingBy = SortingBy.valueOf(mSortingByValue);
+
+//            if (mMovies == null) {
+//                sortByMostPopular();
+//            }
+        } else {
+            mSortingBy = SortingBy.MOST_POPULAR;
         }
 
-        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
-        call.enqueue(new Callback<RetroMovieResults>() {
-            @Override
-            public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
-                if(mMovies == null) {
-                    mMovies = response.body().getResults();
-                    Log.i("networkcall","made a network call");
-                }
-                generateMovieList(mMovies);
-                mAdapter.notifyDataSetChanged();
-            }
+        switch (mSortingBy) {
+            case MOST_POPULAR:
+                sortByMostPopular();
+                break;
+            case HIGHEST_RATED:
+                sortByHighestRated();
+            case FAVORITES:
+                viewFavorites();
+        }
 
-            @Override
-            public void onFailure(Call<RetroMovieResults> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(getApplicationContext(),"network failure",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"conversion issue",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
+//        if(mMovies == null) {
+//        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
+//            Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
+//            call.enqueue(new Callback<RetroMovieResults>() {
+//                @Override
+//                public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
+//                        mMovies = response.body().getResults();
+//                        mMostPopular = mMovies;
+//                        Log.i("networkcall", "made a network call");
+//                    generateMovieList(mMovies);
+//                    mAdapter.notifyDataSetChanged();
+//                }
+//
+//                @Override
+//                public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+//                    if (t instanceof IOException) {
+//                        Toast.makeText(getApplicationContext(), "There is currently no network connection", Toast.LENGTH_LONG).show();
+//                    } else {
+//                        Toast.makeText(getApplicationContext(), "This is a software bug. Please contact the developer of this app to investigate", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            });
+//        }
+   }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -83,10 +111,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mListState = mRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(SAVED_LAYOUT_MANAGER, mListState);
         outState.putParcelableArrayList(SAVED_MOVIE_LIST,((ArrayList<RetroMovie>)mMovies));
+        outState.putString(SAVED_SORTING_OPTION, mSortingBy.name());
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
 //        if(savedInstanceState != null) {
 //            mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
 //            mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
@@ -94,8 +123,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 //        if (mListState != null) {
 //            mLayoutManager.onRestoreInstanceState(mListState);
 //        }
-        super.onRestoreInstanceState(savedInstanceState);
-        }
+//        super.onRestoreInstanceState(savedInstanceState);
+//        }
 
 
 
@@ -123,50 +152,79 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void viewFavorites() {
+        mSortingBy = SortingBy.FAVORITES;
         final LiveData<List<RetroMovie>> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
         favoriteMovies.observe(this, new Observer<List<RetroMovie>>() {
             @Override
             public void onChanged(@Nullable List<RetroMovie> retroMovies) {
-                mMovies = retroMovies;
-                generateMovieList(retroMovies);
+                if(retroMovies.size() > 0) {
+                    mMovies = retroMovies;
+                    generateMovieList(retroMovies);
+                } else {
+                    Toast.makeText(getApplicationContext(), "There are currently no favorites to view", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
-    }
-
-    public void sortByMostPopular(){
-        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
-        call.enqueue(new Callback<RetroMovieResults>() {
-            @Override
-            public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
-                mMovies = response.body().getResults();
-                generateMovieList(mMovies);
-            }
-
-            @Override
-            public void onFailure(Call<RetroMovieResults> call, Throwable t) {
-
-            }
-        });
     }
 
     public void sortByHighestRated() {
+        mSortingBy = SortingBy.HIGHEST_RATED;
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        Call<RetroMovieResults> call = service.getMoviesByRating(API_KEY);
-        call.enqueue(new Callback<RetroMovieResults>() {
-            @Override
-            public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
-                mMovies = response.body().getResults();
-                generateMovieList(mMovies);
-                Toast.makeText(getApplicationContext(),"done",Toast.LENGTH_LONG).show();
-            }
+        if(mHighestRated != null) {
+            mMovies = mHighestRated;
+            generateMovieList(mMovies);
+        }
+        else {
+            Call<RetroMovieResults> call = service.getMoviesByRating(API_KEY);
+            call.enqueue(new Callback<RetroMovieResults>() {
+                @Override
+                public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
+                    mMovies = response.body().getResults();
+                    mHighestRated = mMovies;
+                    generateMovieList(mMovies);
+                    Toast.makeText(getApplicationContext(), "done", Toast.LENGTH_LONG).show();
+                }
 
-            @Override
-            public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+                @Override
+                public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+                    if (t instanceof IOException) {
+                        Toast.makeText(getApplicationContext(), "There is currently no network connection", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "This is a software bug. Please contact the developer of this app to                        investigate", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+    }
 
-            }
-        });
+    public void sortByMostPopular(){
+        mSortingBy = SortingBy.MOST_POPULAR;
+        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
+        if(mMostPopular != null) {
+            mMovies = mMostPopular;
+            generateMovieList(mMovies);
+        } else {
+
+            Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
+            call.enqueue(new Callback<RetroMovieResults>() {
+                @Override
+                public void onResponse(Call<RetroMovieResults> call, Response<RetroMovieResults> response) {
+                    mMovies = response.body().getResults();
+                    mMostPopular = mMovies;
+                    generateMovieList(mMovies);
+                }
+
+                @Override
+                public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+                    if (t instanceof IOException) {
+                        Toast.makeText(getApplicationContext(), "There is currently no network connection", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "This is a software bug. Please contact the developer of this app to                        investigate", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
     }
 
     private void generateMovieList(List<RetroMovie> movieList) {
