@@ -52,6 +52,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     @BindView(R.id.plotSynopsis) TextView mPlotSynopsis;
     @BindView(R.id.ratingBar) RatingBar mRating;
     @BindView(R.id.favoriteButton) ToggleButton mFavoriteButton;
+    @BindView(R.id.reviewHeader) TextView mReviewHeader;
+    @BindView(R.id.trailerHeader) TextView mTrailerHeader;
 
 
 
@@ -91,7 +93,14 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
                 if (response.body() != null) {
                     mTrailers = response.body().getTrailers();
                     generateTrailerList(mTrailers);
+
+                    if (mTrailers.size() < 1) {
+                        mTrailerHeader.setText("No Trailers");
+                    } else {
+                        mTrailerHeader.setText("Trailers:");
+                    }
                 }
+
             }
 
             @Override
@@ -112,6 +121,12 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
                 if (response.body() != null) {
                     mReviews = response.body().getReviews();
                     generateReviewList(mReviews);
+
+                    if (mReviews.size() < 1) {
+                        mReviewHeader.setText("No Reviews");
+                    } else {
+                        mReviewHeader.setText("Reviews:");
+                    }
                 }
             }
 
