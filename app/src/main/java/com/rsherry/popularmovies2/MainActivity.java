@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private static final String SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER";
     private static final String SAVED_MOVIE_LIST = "SAVED_MOVIE_LIST";
     private static final String SAVED_SORTING_OPTION = "SAVED_SORTING_OPTION";
+    public static final String SAVED_FAVORITE_LIST = "SAVED_FAVORITE_LIST";
     private MovieAdapter mAdapter;
     private static final String API_KEY = ApiKey.getApiKey();
     RecyclerView mRecyclerView;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     List<RetroMovie> mMovies;
     List<RetroMovie> mHighestRated;
     List<RetroMovie> mMostPopular;
+    List<RetroMovie> mFavorites;
     AppDatabase mDb;
     Parcelable mListState;
 
@@ -63,11 +65,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             String mSortingByValue = savedInstanceState.getString(SAVED_SORTING_OPTION);
             mSortingBy = SortingBy.valueOf(mSortingByValue);
 
-//            if (mMovies == null) {
-//                sortByMostPopular();
-//            }
         } else {
             mSortingBy = SortingBy.MOST_POPULAR;
+        }
+
+        if(mFavorites == null) {
+            loadSavedFavorites();
         }
 
         switch (mSortingBy) {
@@ -110,22 +113,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         super.onSaveInstanceState(outState);
         mListState = mRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(SAVED_LAYOUT_MANAGER, mListState);
-        outState.putParcelableArrayList(SAVED_MOVIE_LIST,((ArrayList<RetroMovie>)mMovies));
+        outState.putParcelableArrayList(SAVED_MOVIE_LIST,(ArrayList<RetroMovie>)mMovies);
+//        outState.putParcelableArrayList(SAVED_FAVORITE_LIST,(ArrayList<RetroMovie>)mFavorites);
         outState.putString(SAVED_SORTING_OPTION, mSortingBy.name());
     }
-
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        if(savedInstanceState != null) {
-//            mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
-//            mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
-//        }
-//        if (mListState != null) {
-//            mLayoutManager.onRestoreInstanceState(mListState);
-//        }
-//        super.onRestoreInstanceState(savedInstanceState);
-//        }
-
 
 
     @Override
@@ -153,19 +144,30 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private void viewFavorites() {
         mSortingBy = SortingBy.FAVORITES;
+        if(mFavorites.size() > 0) {
+            mMovies = mFavorites;
+            generateMovieList(mMovies);
+        } else {
+            Toast.makeText(getApplicationContext(), "There are currently no saved favorites", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void loadSavedFavorites() {
         final LiveData<List<RetroMovie>> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
         favoriteMovies.observe(this, new Observer<List<RetroMovie>>() {
             @Override
             public void onChanged(@Nullable List<RetroMovie> retroMovies) {
-                if(retroMovies.size() > 0) {
-                    mMovies = retroMovies;
-                    generateMovieList(retroMovies);
-                } else {
-                    Toast.makeText(getApplicationContext(), "There are currently no favorites to view", Toast.LENGTH_LONG).show();
+                mFavorites = retroMovies;
+                if (mSortingBy == SortingBy.FAVORITES){
+                    mMovies = mFavorites;
+                    mAdapter = new MovieAdapter(mMovies,MainActivity.this);
+                    mRecyclerView.setAdapter(mAdapter);
+                    if (mMovies.size() < 1) {
+                        Toast.makeText(getApplicationContext(), "There are currently no saved favorites", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
-
     }
 
     public void sortByHighestRated() {
@@ -244,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         final RetroMovie movie = mMovies.get(clickedItemIndex);
         Intent intent = new Intent(this,MovieDetailActivity.class);
         intent.putExtra("MOVIE",movie);
+        intent.putParcelableArrayListExtra(SAVED_FAVORITE_LIST,(ArrayList<RetroMovie>)mFavorites);
         this.startActivity(intent);
     }
 }

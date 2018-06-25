@@ -3,6 +3,7 @@ package com.rsherry.popularmovies2;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Movie;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,9 +35,11 @@ public class RetroMovie implements Parcelable {
     @SerializedName("vote_average")
     private double mVoteAverage;
 
+    private boolean mFavorite;
+
     @Ignore public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
 
-    public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage) {
+    public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage, boolean favorite) {
         mId = id;
         mTitle = title;
         mReleaseDate = releaseDate;
@@ -44,6 +47,7 @@ public class RetroMovie implements Parcelable {
         mPosterPath = posterPath;
         mBackdropPath = backdropPath;
         mVoteAverage = voteAverage;
+        mFavorite = favorite;
     }
 
 
@@ -115,6 +119,14 @@ public class RetroMovie implements Parcelable {
         mVoteAverage = voteAverage;
     }
 
+    public boolean isFavorite() {
+        return mFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        mFavorite = favorite;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -129,6 +141,7 @@ public class RetroMovie implements Parcelable {
         dest.writeString(mPosterPath);
         dest.writeString(mBackdropPath);
         dest.writeDouble(mVoteAverage);
+        dest.writeValue(mFavorite);
     }
 
     private RetroMovie (Parcel in) {
@@ -139,6 +152,7 @@ public class RetroMovie implements Parcelable {
         mPosterPath = in.readString();
         mBackdropPath = in.readString();
         mVoteAverage = in.readDouble();
+        mFavorite = (boolean) in.readValue(null);
     }
 
     public static final Creator<RetroMovie> CREATOR = new Creator<RetroMovie>() {
@@ -152,5 +166,15 @@ public class RetroMovie implements Parcelable {
             return new RetroMovie[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean sameObject = false;
+
+        if (obj instanceof RetroMovie) {
+            sameObject = this.mId == ((RetroMovie) obj).mId;
+        }
+        return sameObject;
+    }
 
 }

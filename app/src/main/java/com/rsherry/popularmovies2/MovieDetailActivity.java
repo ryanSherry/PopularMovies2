@@ -40,6 +40,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     RecyclerView mRecyclerView;
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
+    private List<RetroMovie> mFavorites;
     private RetroMovie mMovie;
 
     // Member variable for the Database
@@ -53,6 +54,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     @BindView(R.id.favoriteButton) ToggleButton mFavoriteButton;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,21 +63,35 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         ButterKnife.bind(this);
 
         Intent intent = getIntent();
+
         RetroMovie movie = intent.getParcelableExtra("MOVIE");
         mMovie = movie;
+
+
+        mFavorites = intent.getParcelableArrayListExtra(MainActivity.SAVED_FAVORITE_LIST);
+        if(mFavorites.contains(mMovie)) {
+            mFavoriteButton.setChecked(true);
+        } else {
+            mFavoriteButton.setChecked(false);
+        }
+
+
 
         Uri uri = Uri.parse(movie.getBackDropUrl());
         Picasso.get().load(uri).into(mMoviePoster);
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
+
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
         Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(),API_KEY);
         trailersCall.enqueue(new Callback<RetroTrailerResults>() {
             @Override
             public void onResponse(Call<RetroTrailerResults> call, Response<RetroTrailerResults> response) {
-                mTrailers = response.body().getTrailers();
-                generateTrailerList(mTrailers);
+                if (response.body() != null) {
+                    mTrailers = response.body().getTrailers();
+                    generateTrailerList(mTrailers);
+                }
             }
 
             @Override
@@ -92,8 +109,10 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         reviewsCall.enqueue(new Callback<RetroReviewResults>() {
             @Override
             public void onResponse(Call<RetroReviewResults> call, Response<RetroReviewResults> response) {
-                mReviews = response.body().getReviews();
-                generateReviewList(mReviews);
+                if (response.body() != null) {
+                    mReviews = response.body().getReviews();
+                    generateReviewList(mReviews);
+                }
             }
 
             @Override
@@ -175,6 +194,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     // Saves movie as a favorite
 
     public void saveFavorite() {
+//        mMovie.setFavorite(true);
+
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
         String releaseDate = mMovie.getReleaseDate();
@@ -182,8 +203,9 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         String posterPath = mMovie.getPosterPath();
         String backDropPath = mMovie.getBackdropPath();
         double voteAverage = mMovie.getVoteAverage();
+        boolean isFavorite = mMovie.isFavorite();
 
-        final RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
+        final RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage, isFavorite);
 
         AppExecutors.getsInstance().getDiskIO().execute(new Runnable() {
             @Override
@@ -194,6 +216,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     }
 
     public void deleteFavorite() {
+//        mMovie.setFavorite(false);
+
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
         String releaseDate = mMovie.getReleaseDate();
@@ -201,9 +225,15 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         String posterPath = mMovie.getPosterPath();
         String backDropPath = mMovie.getBackdropPath();
         double voteAverage = mMovie.getVoteAverage();
+        boolean isFavorite = mMovie.isFavorite();
 
-        RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage);
-        mDb.movieFavoritesDao().deleteFavoriteMovie(favoriteMovie);
+        final RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage, isFavorite);
+        AppExecutors.getsInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb.movieFavoritesDao().deleteFavoriteMovie(favoriteMovie);
+            }
+        });
     }
 
     public void toggleFavoriteButton(ToggleButton toggleButton) {
