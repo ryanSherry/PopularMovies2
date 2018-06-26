@@ -45,12 +45,14 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     private static final String SAVED_REVIEWS_LAYOUT_MANAGER = "SAVED_REVIEWS_LAYOUT_MANAGER";
     private static final String SAVED_TRAILERS_LIST = "SAVED_TRAILERS_LIST";
     private static final String SAVED_REVIEWS_LIST = "SAVED_REVIEWS_LIST";
+    private static final String SAVED_FAVORITES_TEXT_COLOR = "SAVED_FAVORITES_TEXT_COLOR";
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
     private List<RetroMovie> mFavorites;
     private RetroMovie mMovie;
     private Parcelable mTrailerListState;
     private Parcelable mReviewListState;
+    private int mFavoriteTextColor;
 //    private RecyclerView.LayoutManager mTrailerLayoutManager;
 //    private RecyclerView.LayoutManager mReviewLayoutManager;
 
@@ -70,8 +72,6 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     @BindView(R.id.favoriteText) TextView mFavoriteText;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +87,10 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         mFavorites = intent.getParcelableArrayListExtra(MainActivity.SAVED_FAVORITE_LIST);
         if(mFavorites.contains(mMovie)) {
             mFavoriteButton.setChecked(true);
+            mFavoriteText.setTextColor(Color.parseColor("#00DDFF"));
         } else {
             mFavoriteButton.setChecked(false);
+            mFavoriteText.setTextColor(Color.parseColor("#808080"));
         }
 
         if(savedInstanceState != null) {
@@ -96,12 +98,18 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             mReviewListState = savedInstanceState.getParcelable(SAVED_REVIEWS_LAYOUT_MANAGER);
             mTrailers = savedInstanceState.getParcelableArrayList(SAVED_TRAILERS_LIST);
             mReviews = savedInstanceState.getParcelableArrayList(SAVED_REVIEWS_LIST);
+            mFavoriteTextColor = savedInstanceState.getInt(SAVED_FAVORITES_TEXT_COLOR);
+            mFavoriteText.setTextColor(mFavoriteTextColor);
         }
 
 
 
         Uri uri = Uri.parse(movie.getBackDropUrl());
-        Picasso.get().load(uri).into(mMoviePoster);
+        Picasso.get().load(uri)
+                .error(R.drawable.no_image_available)
+                .resize(600,200)
+                .centerInside()
+                .into(mMoviePoster);
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
@@ -193,6 +201,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         outState.putParcelable(SAVED_REVIEWS_LAYOUT_MANAGER, mReviewListState);
         outState.putParcelableArrayList(SAVED_TRAILERS_LIST,(ArrayList<RetroTrailer>) mTrailers);
         outState.putParcelableArrayList(SAVED_REVIEWS_LIST, (ArrayList<RetroReview>) mReviews);
+        outState.putInt(SAVED_FAVORITES_TEXT_COLOR,mFavoriteText.getCurrentTextColor());
     }
 
     private void populateUI(RetroMovie movie) {

@@ -16,9 +16,9 @@
 
         <ImageView
             android:id="@+id/detailMoviePoster"
-            android:layout_width="384dp"
-            android:layout_height="233dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
             android:contentDescription="@string/movieCoverDesc"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -60,8 +60,8 @@
             android:layout_gravity="center"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:color="#808080"
             android:text="Favorite"
+            android:color="#808080"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@+id/favoriteButton"
             app:layout_constraintTop_toBottomOf="@+id/favoriteButton" />
@@ -71,6 +71,7 @@
             android:id="@+id/releaseDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
@@ -107,6 +108,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:textColor="@android:color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toTopOf="@+id/trailerHeader"
@@ -120,7 +122,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+
             android:text="Trailers:"
             android:textColor="@android:color/white"
             android:textSize="30sp"

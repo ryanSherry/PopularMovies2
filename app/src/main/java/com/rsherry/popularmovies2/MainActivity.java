@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     mMovies = response.body().getResults();
                     mHighestRated = mMovies;
                     generateMovieList(mMovies);
-                    Toast.makeText(getApplicationContext(), "done", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
