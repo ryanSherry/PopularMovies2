@@ -1,6 +1,7 @@
 package com.rsherry.popularmovies2;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -66,6 +67,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     @BindView(R.id.trailerHeader) TextView mTrailerHeader;
     @BindView(R.id.reviewRecyclerView) RecyclerView mReviewRecyclerView;
     @BindView(R.id.trailerRecyclerView) RecyclerView mTrailerRecyclerView;
+    @BindView(R.id.favoriteText) TextView mFavoriteText;
 
 
 
@@ -256,6 +258,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     public void saveFavorite() {
 //        mMovie.setFavorite(true);
 
+
+
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();
         String releaseDate = mMovie.getReleaseDate();
@@ -299,8 +303,10 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     public void toggleFavoriteButton(ToggleButton toggleButton) {
         if(toggleButton.isChecked()) {
             saveFavorite();
+            mFavoriteText.setTextColor(Color.parseColor("#00DDFF"));
         } else {
             deleteFavorite();
+            mFavoriteText.setTextColor(Color.parseColor("#808080"));
         }
         }
     }
