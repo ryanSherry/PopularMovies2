@@ -46,6 +46,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     private static final String SAVED_TRAILERS_LIST = "SAVED_TRAILERS_LIST";
     private static final String SAVED_REVIEWS_LIST = "SAVED_REVIEWS_LIST";
     private static final String SAVED_FAVORITES_TEXT_COLOR = "SAVED_FAVORITES_TEXT_COLOR";
+    private static final String SAVED_TRAILERS_HEADER = "SAVED_TRAILERS_HEADER";
+    private static final String SAVED_REVIEWS_HEADER = "SAVED_REVIEWS_HEADER";
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
     private List<RetroMovie> mFavorites;
@@ -100,6 +102,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             mReviews = savedInstanceState.getParcelableArrayList(SAVED_REVIEWS_LIST);
             mFavoriteTextColor = savedInstanceState.getInt(SAVED_FAVORITES_TEXT_COLOR);
             mFavoriteText.setTextColor(mFavoriteTextColor);
+            mTrailerHeader.setText(savedInstanceState.getCharSequence(SAVED_TRAILERS_HEADER));
+            mReviewHeader.setText(savedInstanceState.getCharSequence(SAVED_REVIEWS_HEADER));
         }
 
 
@@ -125,6 +129,20 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             }
         });
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mTrailerListState = mTrailerRecyclerView.getLayoutManager().onSaveInstanceState();
+        mReviewListState = mReviewRecyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(SAVED_TRAILERS_LAYOUT_MANAGER, mTrailerListState);
+        outState.putParcelable(SAVED_REVIEWS_LAYOUT_MANAGER, mReviewListState);
+        outState.putParcelableArrayList(SAVED_TRAILERS_LIST,(ArrayList<RetroTrailer>) mTrailers);
+        outState.putParcelableArrayList(SAVED_REVIEWS_LIST, (ArrayList<RetroReview>) mReviews);
+        outState.putInt(SAVED_FAVORITES_TEXT_COLOR,mFavoriteText.getCurrentTextColor());
+        outState.putCharSequence(SAVED_TRAILERS_HEADER, mTrailerHeader.getText());
+        outState.putCharSequence(SAVED_REVIEWS_HEADER, mReviewHeader.getText());
     }
 
     private void getTrailersAndReviews(RetroMovie movie) {
@@ -190,18 +208,6 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
                 }
             });
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mTrailerListState = mTrailerRecyclerView.getLayoutManager().onSaveInstanceState();
-        mReviewListState = mReviewRecyclerView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(SAVED_TRAILERS_LAYOUT_MANAGER, mTrailerListState);
-        outState.putParcelable(SAVED_REVIEWS_LAYOUT_MANAGER, mReviewListState);
-        outState.putParcelableArrayList(SAVED_TRAILERS_LIST,(ArrayList<RetroTrailer>) mTrailers);
-        outState.putParcelableArrayList(SAVED_REVIEWS_LIST, (ArrayList<RetroReview>) mReviews);
-        outState.putInt(SAVED_FAVORITES_TEXT_COLOR,mFavoriteText.getCurrentTextColor());
     }
 
     private void populateUI(RetroMovie movie) {
