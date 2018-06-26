@@ -2,6 +2,8 @@ package com.rsherry.popularmovies2;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -26,6 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,11 +40,18 @@ import retrofit2.Response;
 
 public class MovieDetailActivity extends AppCompatActivity implements ListItemClickListener {
     private static final String API_KEY = ApiKey.getApiKey();
-    RecyclerView mRecyclerView;
+    private static final String SAVED_TRAILERS_LAYOUT_MANAGER = "SAVED_TRAILERS_LAYOUT_MANAGER";
+    private static final String SAVED_REVIEWS_LAYOUT_MANAGER = "SAVED_REVIEWS_LAYOUT_MANAGER";
+    private static final String SAVED_TRAILERS_LIST = "SAVED_TRAILERS_LIST";
+    private static final String SAVED_REVIEWS_LIST = "SAVED_REVIEWS_LIST";
     private List<RetroTrailer> mTrailers;
     private List<RetroReview> mReviews;
     private List<RetroMovie> mFavorites;
     private RetroMovie mMovie;
+    private Parcelable mTrailerListState;
+    private Parcelable mReviewListState;
+//    private RecyclerView.LayoutManager mTrailerLayoutManager;
+//    private RecyclerView.LayoutManager mReviewLayoutManager;
 
     // Member variable for the Database
     private AppDatabase mDb;
@@ -54,6 +64,8 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     @BindView(R.id.favoriteButton) ToggleButton mFavoriteButton;
     @BindView(R.id.reviewHeader) TextView mReviewHeader;
     @BindView(R.id.trailerHeader) TextView mTrailerHeader;
+    @BindView(R.id.reviewRecyclerView) RecyclerView mReviewRecyclerView;
+    @BindView(R.id.trailerRecyclerView) RecyclerView mTrailerRecyclerView;
 
 
 
@@ -77,6 +89,13 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             mFavoriteButton.setChecked(false);
         }
 
+        if(savedInstanceState != null) {
+            mTrailerListState = savedInstanceState.getParcelable(SAVED_TRAILERS_LAYOUT_MANAGER);
+            mReviewListState = savedInstanceState.getParcelable(SAVED_REVIEWS_LAYOUT_MANAGER);
+            mTrailers = savedInstanceState.getParcelableArrayList(SAVED_TRAILERS_LIST);
+            mReviews = savedInstanceState.getParcelableArrayList(SAVED_REVIEWS_LIST);
+        }
+
 
 
         Uri uri = Uri.parse(movie.getBackDropUrl());
@@ -85,61 +104,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
 
-        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(),API_KEY);
-        trailersCall.enqueue(new Callback<RetroTrailerResults>() {
-            @Override
-            public void onResponse(Call<RetroTrailerResults> call, Response<RetroTrailerResults> response) {
-                if (response.body() != null) {
-                    mTrailers = response.body().getTrailers();
-                    generateTrailerList(mTrailers);
-
-                    if (mTrailers.size() < 1) {
-                        mTrailerHeader.setText("No Trailers");
-                    } else {
-                        mTrailerHeader.setText("Trailers:");
-                    }
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<RetroTrailerResults> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(getApplicationContext(),"network failure",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"conversion issue",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-        Call<RetroReviewResults> reviewsCall = service.getMovieReviews(movie.getId(),API_KEY);
-        reviewsCall.enqueue(new Callback<RetroReviewResults>() {
-            @Override
-            public void onResponse(Call<RetroReviewResults> call, Response<RetroReviewResults> response) {
-                if (response.body() != null) {
-                    mReviews = response.body().getReviews();
-                    generateReviewList(mReviews);
-
-                    if (mReviews.size() < 1) {
-                        mReviewHeader.setText("No Reviews");
-                    } else {
-                        mReviewHeader.setText("Reviews:");
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RetroReviewResults> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(getApplicationContext(),"network failure",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"conversion issue",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        getTrailersAndReviews(movie);
 
         populateUI(movie);
 
@@ -152,6 +117,82 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
     }
 
+    private void getTrailersAndReviews(RetroMovie movie) {
+        GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
+
+        if(mTrailers != null) {
+            generateTrailerList(mTrailers);
+        } else {
+            Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(), API_KEY);
+            trailersCall.enqueue(new Callback<RetroTrailerResults>() {
+                @Override
+                public void onResponse(Call<RetroTrailerResults> call, Response<RetroTrailerResults> response) {
+                    if (response.body() != null) {
+                        mTrailers = response.body().getTrailers();
+                        generateTrailerList(mTrailers);
+
+                        if (mTrailers.size() < 1) {
+                            mTrailerHeader.setText("No Trailers");
+                        } else {
+                            mTrailerHeader.setText("Trailers:");
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<RetroTrailerResults> call, Throwable t) {
+                    if (t instanceof IOException) {
+                        Toast.makeText(getApplicationContext(), "network failure", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "conversion issue", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+        if(mReviewListState != null) {
+            generateReviewList(mReviews);
+        } else {
+            Call<RetroReviewResults> reviewsCall = service.getMovieReviews(movie.getId(), API_KEY);
+            reviewsCall.enqueue(new Callback<RetroReviewResults>() {
+                @Override
+                public void onResponse(Call<RetroReviewResults> call, Response<RetroReviewResults> response) {
+                    if (response.body() != null) {
+                        mReviews = response.body().getReviews();
+                        generateReviewList(mReviews);
+
+                        if (mReviews.size() < 1) {
+                            mReviewHeader.setText("No Reviews");
+                        } else {
+                            mReviewHeader.setText("Reviews:");
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<RetroReviewResults> call, Throwable t) {
+                    if (t instanceof IOException) {
+                        Toast.makeText(getApplicationContext(), "network failure", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "conversion issue", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mTrailerListState = mTrailerRecyclerView.getLayoutManager().onSaveInstanceState();
+        mReviewListState = mReviewRecyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(SAVED_TRAILERS_LAYOUT_MANAGER, mTrailerListState);
+        outState.putParcelable(SAVED_REVIEWS_LAYOUT_MANAGER, mReviewListState);
+        outState.putParcelableArrayList(SAVED_TRAILERS_LIST,(ArrayList<RetroTrailer>) mTrailers);
+        outState.putParcelableArrayList(SAVED_REVIEWS_LIST, (ArrayList<RetroReview>) mReviews);
+    }
+
     private void populateUI(RetroMovie movie) {
 
         mTitle.setText(movie.getTitle());
@@ -161,21 +202,25 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     }
 
     private void generateTrailerList(List<RetroTrailer> trailers) {
-        mRecyclerView = findViewById(R.id.trailerRecyclerView);
         TrailerAdapter adapter = new TrailerAdapter(trailers,this);
+        mTrailerRecyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(adapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(),DividerItemDecoration.VERTICAL));
+        if(mTrailerListState != null) {
+            layoutManager.onRestoreInstanceState(mTrailerListState);
+        }
+        mTrailerRecyclerView.setLayoutManager(layoutManager);
+        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mTrailerRecyclerView.getContext(),DividerItemDecoration.VERTICAL));
         adapter.notifyDataSetChanged();
     }
 
     private void generateReviewList(List<RetroReview> reviews) {
-        mRecyclerView = findViewById(R.id.reviewRecyclerView);
         ReviewAdapter adapter = new ReviewAdapter(reviews);
+        mReviewRecyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(adapter);
+        if(mReviewListState != null) {
+            layoutManager.onRestoreInstanceState(mReviewListState);
+        }
+        mReviewRecyclerView.setLayoutManager(layoutManager);
         adapter.notifyDataSetChanged();
     }
 
