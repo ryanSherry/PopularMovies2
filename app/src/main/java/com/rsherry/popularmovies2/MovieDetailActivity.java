@@ -271,7 +271,6 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     // Saves movie as a favorite
 
     public void saveFavorite() {
-//        mMovie.setFavorite(true);
 
 
 
@@ -295,7 +294,6 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     }
 
     public void deleteFavorite() {
-//        mMovie.setFavorite(false);
 
         int movieId = mMovie.getId();
         String movieTitle = mMovie.getTitle();

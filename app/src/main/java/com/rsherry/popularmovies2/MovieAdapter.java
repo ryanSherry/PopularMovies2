@@ -75,5 +75,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     public void setMovies(List<RetroMovie> movieList) {
         mMovies = movieList;
+        notifyDataSetChanged();
     }
 }
