@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Popular Movies 2</string>
+    <string name="movieCoverDesc">Image showing Movie Cover</string>
 </resources>
