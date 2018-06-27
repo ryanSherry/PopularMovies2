@@ -20,7 +20,7 @@ public class AppExecutors {
     }
 
     public static AppExecutors getsInstance() {
-        if(sInstance == null) {
+        if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new AppExecutors(Executors.newSingleThreadExecutor(),
                         Executors.newFixedThreadPool(3),
@@ -29,6 +29,7 @@ public class AppExecutors {
         }
         return sInstance;
     }
+
     public Executor getDiskIO() {
         return diskIO;
     }

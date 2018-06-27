@@ -1,15 +1,12 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.graphics.Movie;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
 
 @Entity(tableName = "favorite_movies")
 public class RetroMovie implements Parcelable {
@@ -37,7 +34,8 @@ public class RetroMovie implements Parcelable {
 
     private boolean mFavorite;
 
-    @Ignore public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
+    @Ignore
+    public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185/";
 
     public RetroMovie(int id, String title, String releaseDate, String overview, String posterPath, String backdropPath, double voteAverage, boolean favorite) {
         mId = id;
@@ -144,7 +142,7 @@ public class RetroMovie implements Parcelable {
         dest.writeValue(mFavorite);
     }
 
-    private RetroMovie (Parcel in) {
+    private RetroMovie(Parcel in) {
         mId = in.readInt();
         mTitle = in.readString();
         mReleaseDate = in.readString();
