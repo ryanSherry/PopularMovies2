@@ -1,4 +1,4 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.model;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -1,4 +1,4 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.networking;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
