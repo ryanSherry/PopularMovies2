@@ -6,4 +6,8 @@
     <string name="trailersMessage">Trailers:</string>
     <string name="noReviewsMessage">No Reviews</string>
     <string name="reviewsMessage">Reviews:</string>
+    <string name="favorite">Favorite</string>
+    <string name="trailers">Trailers:</string>
+    <string name="play_button">Play button</string>
+    <string name="movie_poster">Movie Poster</string>
 </resources>
