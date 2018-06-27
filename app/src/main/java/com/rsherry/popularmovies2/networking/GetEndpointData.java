@@ -13,12 +13,12 @@ public interface GetEndpointData {
     retrofit2.Call<RetroMovieResults> getMoviesByPopularity(@Query("api_key") String api_key);
 
     @GET("movie/top_rated")
-    retrofit2.Call<RetroMovieResults> getMoviesByRating (@Query("api_key") String api_key);
+    retrofit2.Call<RetroMovieResults> getMoviesByRating(@Query("api_key") String api_key);
 
     @GET("movie/{id}/videos")
-    retrofit2.Call<RetroTrailerResults> getMovieTrailers (@Path("id") int id, @Query("api_key") String api_key);
+    retrofit2.Call<RetroTrailerResults> getMovieTrailers(@Path("id") int id, @Query("api_key") String api_key);
 
     @GET("movie/{id}/reviews")
-    retrofit2.Call<RetroReviewResults> getMovieReviews (@Path("id") int id, @Query("api_key") String api_key);
+    retrofit2.Call<RetroReviewResults> getMovieReviews(@Path("id") int id, @Query("api_key") String api_key);
 
 }

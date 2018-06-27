@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Popular Movies 2</string>
     <string name="movieCoverDesc">Image showing Movie Cover</string>
+    <string name="noSavedFavoritesMessage">There are currently no saved favorites</string>
+    <string name="noTrailersMessage">No Trailers</string>
+    <string name="trailersMessage">Trailers:</string>
+    <string name="noReviewsMessage">No Reviews</string>
+    <string name="reviewsMessage">Reviews:</string>
 </resources>

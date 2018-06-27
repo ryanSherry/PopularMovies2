@@ -1,4 +1,4 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.rsherry.popularmovies2.ListItemClickListener;
+import com.rsherry.popularmovies2.R;
 import com.rsherry.popularmovies2.model.RetroTrailer;
 
 import java.util.List;
@@ -16,7 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> implements ListItemClickListener {
-    List<RetroTrailer> mTrailers;
+    private List<RetroTrailer> mTrailers;
     final private ListItemClickListener mOnClickListener;
 
     public TrailerAdapter(List<RetroTrailer> trailers, ListItemClickListener listener) {
@@ -28,7 +30,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     @Override
     public TrailerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.trailer_list_item,parent,false);
+                .inflate(R.layout.trailer_list_item, parent, false);
 
         return new TrailerViewHolder(view);
     }
@@ -50,14 +52,16 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
     }
 
-    public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        @BindView(R.id.playTrailer) ImageView mPlayTrailer;
-        @BindView(R.id.trailerTitle) TextView mTrailerTitle;
+        @BindView(R.id.playTrailer)
+        ImageView mPlayTrailer;
+        @BindView(R.id.trailerTitle)
+        TextView mTrailerTitle;
 
         public TrailerViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 

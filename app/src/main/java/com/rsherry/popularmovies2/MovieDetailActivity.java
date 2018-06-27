@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -17,7 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.rsherry.popularmovies2.adapters.ReviewAdapter;
+import com.rsherry.popularmovies2.adapters.TrailerAdapter;
 import com.rsherry.popularmovies2.database.AppDatabase;
+import com.rsherry.popularmovies2.model.RetroMovie;
 import com.rsherry.popularmovies2.model.RetroReview;
 import com.rsherry.popularmovies2.model.RetroReviewResults;
 import com.rsherry.popularmovies2.model.RetroTrailer;
@@ -55,23 +57,32 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     private Parcelable mTrailerListState;
     private Parcelable mReviewListState;
     private int mFavoriteTextColor;
-//    private RecyclerView.LayoutManager mTrailerLayoutManager;
-//    private RecyclerView.LayoutManager mReviewLayoutManager;
 
     // Member variable for the Database
     private AppDatabase mDb;
 
-    @BindView(R.id.detailMoviePoster) ImageView mMoviePoster;
-    @BindView(R.id.movieTitle) TextView mTitle;
-    @BindView(R.id.releaseDate) TextView mReleaseDate;
-    @BindView(R.id.plotSynopsis) TextView mPlotSynopsis;
-    @BindView(R.id.ratingBar) RatingBar mRating;
-    @BindView(R.id.favoriteButton) ToggleButton mFavoriteButton;
-    @BindView(R.id.reviewHeader) TextView mReviewHeader;
-    @BindView(R.id.trailerHeader) TextView mTrailerHeader;
-    @BindView(R.id.reviewRecyclerView) RecyclerView mReviewRecyclerView;
-    @BindView(R.id.trailerRecyclerView) RecyclerView mTrailerRecyclerView;
-    @BindView(R.id.favoriteText) TextView mFavoriteText;
+    @BindView(R.id.detailMoviePoster)
+    ImageView mMoviePoster;
+    @BindView(R.id.movieTitle)
+    TextView mTitle;
+    @BindView(R.id.releaseDate)
+    TextView mReleaseDate;
+    @BindView(R.id.plotSynopsis)
+    TextView mPlotSynopsis;
+    @BindView(R.id.ratingBar)
+    RatingBar mRating;
+    @BindView(R.id.favoriteButton)
+    ToggleButton mFavoriteButton;
+    @BindView(R.id.reviewHeader)
+    TextView mReviewHeader;
+    @BindView(R.id.trailerHeader)
+    TextView mTrailerHeader;
+    @BindView(R.id.reviewRecyclerView)
+    RecyclerView mReviewRecyclerView;
+    @BindView(R.id.trailerRecyclerView)
+    RecyclerView mTrailerRecyclerView;
+    @BindView(R.id.favoriteText)
+    TextView mFavoriteText;
 
 
     @Override
@@ -87,7 +98,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
 
         mFavorites = intent.getParcelableArrayListExtra(MainActivity.SAVED_FAVORITE_LIST);
-        if(mFavorites.contains(mMovie)) {
+        if (mFavorites.contains(mMovie)) {
             mFavoriteButton.setChecked(true);
             mFavoriteText.setTextColor(Color.parseColor("#00DDFF"));
         } else {
@@ -95,7 +106,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             mFavoriteText.setTextColor(Color.parseColor("#808080"));
         }
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mTrailerListState = savedInstanceState.getParcelable(SAVED_TRAILERS_LAYOUT_MANAGER);
             mReviewListState = savedInstanceState.getParcelable(SAVED_REVIEWS_LAYOUT_MANAGER);
             mTrailers = savedInstanceState.getParcelableArrayList(SAVED_TRAILERS_LIST);
@@ -107,11 +118,10 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         }
 
 
-
         Uri uri = Uri.parse(movie.getBackDropUrl());
         Picasso.get().load(uri)
                 .error(R.drawable.no_image_available)
-                .resize(600,200)
+                .resize(600, 200)
                 .centerInside()
                 .into(mMoviePoster);
 
@@ -138,9 +148,9 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         mReviewListState = mReviewRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(SAVED_TRAILERS_LAYOUT_MANAGER, mTrailerListState);
         outState.putParcelable(SAVED_REVIEWS_LAYOUT_MANAGER, mReviewListState);
-        outState.putParcelableArrayList(SAVED_TRAILERS_LIST,(ArrayList<RetroTrailer>) mTrailers);
+        outState.putParcelableArrayList(SAVED_TRAILERS_LIST, (ArrayList<RetroTrailer>) mTrailers);
         outState.putParcelableArrayList(SAVED_REVIEWS_LIST, (ArrayList<RetroReview>) mReviews);
-        outState.putInt(SAVED_FAVORITES_TEXT_COLOR,mFavoriteText.getCurrentTextColor());
+        outState.putInt(SAVED_FAVORITES_TEXT_COLOR, mFavoriteText.getCurrentTextColor());
         outState.putCharSequence(SAVED_TRAILERS_HEADER, mTrailerHeader.getText());
         outState.putCharSequence(SAVED_REVIEWS_HEADER, mReviewHeader.getText());
     }
@@ -148,7 +158,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     private void getTrailersAndReviews(RetroMovie movie) {
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
 
-        if(mTrailers != null) {
+        if (mTrailers != null) {
             generateTrailerList(mTrailers);
         } else {
             Call<RetroTrailerResults> trailersCall = service.getMovieTrailers(movie.getId(), API_KEY);
@@ -160,9 +170,9 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
                         generateTrailerList(mTrailers);
 
                         if (mTrailers.size() < 1) {
-                            mTrailerHeader.setText("No Trailers");
+                            mTrailerHeader.setText(R.string.noTrailersMessage);
                         } else {
-                            mTrailerHeader.setText("Trailers:");
+                            mTrailerHeader.setText(R.string.trailersMessage);
                         }
                     }
 
@@ -179,7 +189,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
             });
         }
 
-        if(mReviewListState != null) {
+        if (mReviewListState != null) {
             generateReviewList(mReviews);
         } else {
             Call<RetroReviewResults> reviewsCall = service.getMovieReviews(movie.getId(), API_KEY);
@@ -191,15 +201,18 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
                         generateReviewList(mReviews);
 
                         if (mReviews.size() < 1) {
-                            mReviewHeader.setText("No Reviews");
+                            mReviewHeader.setText(R.string.noReviewsMessage);
                         } else {
-                            mReviewHeader.setText("Reviews:");
+                            mReviewHeader.setText(R.string.reviewsMessage);
                         }
                     }
                 }
 
                 @Override
                 public void onFailure(Call<RetroReviewResults> call, Throwable t) {
+
+                    //Test to see if there is a network or configuration issue with retrofit
+
                     if (t instanceof IOException) {
                         Toast.makeText(getApplicationContext(), "network failure", Toast.LENGTH_LONG).show();
                     } else {
@@ -215,18 +228,18 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         mTitle.setText(movie.getTitle());
         mReleaseDate.setText(dateFormatter(movie.getReleaseDate()));
         mPlotSynopsis.setText(movie.getOverview());
-        mRating.setRating((float) movie.getVoteAverage()/2);
+        mRating.setRating((float) movie.getVoteAverage() / 2);
     }
 
     private void generateTrailerList(List<RetroTrailer> trailers) {
-        TrailerAdapter adapter = new TrailerAdapter(trailers,this);
+        TrailerAdapter adapter = new TrailerAdapter(trailers, this);
         mTrailerRecyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        if(mTrailerListState != null) {
+        if (mTrailerListState != null) {
             layoutManager.onRestoreInstanceState(mTrailerListState);
         }
         mTrailerRecyclerView.setLayoutManager(layoutManager);
-        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mTrailerRecyclerView.getContext(),DividerItemDecoration.VERTICAL));
+        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mTrailerRecyclerView.getContext(), DividerItemDecoration.VERTICAL));
         adapter.notifyDataSetChanged();
     }
 
@@ -234,7 +247,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         ReviewAdapter adapter = new ReviewAdapter(reviews);
         mReviewRecyclerView.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        if(mReviewListState != null) {
+        if (mReviewListState != null) {
             layoutManager.onRestoreInstanceState(mReviewListState);
         }
         mReviewRecyclerView.setLayoutManager(layoutManager);
@@ -250,11 +263,13 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return (String) android.text.format.DateFormat.format("MMMM yyyy",newDate);
+        return (String) android.text.format.DateFormat.format("MMMM d yyyy", newDate);
     }
 
     @Override
     public void onListItemClick(int clickedItemIndex) {
+
+        // Clicking Trailer takes user to youtube
 
         RetroTrailer trailer = mTrailers.get(clickedItemIndex);
         String youtubeKey = trailer.getKey();
@@ -263,15 +278,12 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
 
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
 
-        if(intent.resolveActivity(getPackageManager()) != null) {
+        if (intent.resolveActivity(getPackageManager()) != null) {
             this.startActivity(intent);
         }
     }
 
-    // Saves movie as a favorite
-
     public void saveFavorite() {
-
 
 
         int movieId = mMovie.getId();
@@ -305,6 +317,7 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
         boolean isFavorite = mMovie.isFavorite();
 
         final RetroMovie favoriteMovie = new RetroMovie(movieId, movieTitle, releaseDate, overView, posterPath, backDropPath, voteAverage, isFavorite);
+
         AppExecutors.getsInstance().getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -314,12 +327,12 @@ public class MovieDetailActivity extends AppCompatActivity implements ListItemCl
     }
 
     public void toggleFavoriteButton(ToggleButton toggleButton) {
-        if(toggleButton.isChecked()) {
+        if (toggleButton.isChecked()) {
             saveFavorite();
             mFavoriteText.setTextColor(Color.parseColor("#00DDFF"));
         } else {
             deleteFavorite();
             mFavoriteText.setTextColor(Color.parseColor("#808080"));
         }
-        }
     }
+}

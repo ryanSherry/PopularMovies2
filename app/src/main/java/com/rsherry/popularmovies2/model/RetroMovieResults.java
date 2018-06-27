@@ -1,7 +1,6 @@
 package com.rsherry.popularmovies2.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.rsherry.popularmovies2.RetroMovie;
 
 import java.util.List;
 

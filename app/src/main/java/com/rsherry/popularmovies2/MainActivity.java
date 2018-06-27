@@ -1,12 +1,9 @@
 package com.rsherry.popularmovies2;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +15,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.rsherry.popularmovies2.adapters.MovieAdapter;
 import com.rsherry.popularmovies2.database.AppDatabase;
+import com.rsherry.popularmovies2.model.RetroMovie;
 import com.rsherry.popularmovies2.model.RetroMovieResults;
 import com.rsherry.popularmovies2.networking.GetEndpointData;
 import com.rsherry.popularmovies2.networking.RetrofitClentInstance;
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mListState = savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER);
             mMovies = savedInstanceState.getParcelableArrayList(SAVED_MOVIE_LIST);
             mMostPopular = savedInstanceState.getParcelableArrayList(SAVED_MOST_POPULAR);
@@ -72,8 +71,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             String mSortingByValue = savedInstanceState.getString(SAVED_SORTING_OPTION);
             mSortingBy = SortingBy.valueOf(mSortingByValue);
 
-        }
-        else {
+        } else {
             mSortingBy = SortingBy.MOST_POPULAR;
         }
 
@@ -89,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 viewFavorites(mFavorites);
         }
 
-   }
+    }
 
 
     @Override
@@ -97,22 +95,26 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         super.onSaveInstanceState(outState);
         mListState = mRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(SAVED_LAYOUT_MANAGER, mListState);
-        outState.putParcelableArrayList(SAVED_MOVIE_LIST,(ArrayList<RetroMovie>)mMovies);
-        outState.putParcelableArrayList(SAVED_HIGHEST_RATED,(ArrayList<RetroMovie>)mHighestRated);
-        outState.putParcelableArrayList(SAVED_MOST_POPULAR,(ArrayList<RetroMovie>)mMostPopular);
+
+        //Saving Favorites list only so it can be passed to the detailActivity via an intent and used to determine if the movie is a favorite or not. The actual persistence of favorites is done via Room and ViewModel
+
+        outState.putParcelableArrayList(SAVED_MOVIE_LIST, (ArrayList<RetroMovie>) mMovies);
+
+        outState.putParcelableArrayList(SAVED_HIGHEST_RATED, (ArrayList<RetroMovie>) mHighestRated);
+        outState.putParcelableArrayList(SAVED_MOST_POPULAR, (ArrayList<RetroMovie>) mMostPopular);
         outState.putString(SAVED_SORTING_OPTION, mSortingBy.name());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.movie_sort_menu,menu);
+        inflater.inflate(R.menu.movie_sort_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.sort_highest_rated:
                 sortByHighestRated();
                 break;
@@ -127,36 +129,32 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void viewFavorites(List<RetroMovie> favorites) {
-//        if(mFavorites.size() > 0) {
-            mSortingBy = SortingBy.FAVORITES;
-            if(favorites != null) {
-                mMovies = favorites;
-            }
-            generateMovieList(mMovies);
-            mRecyclerView.getAdapter().notifyDataSetChanged();
-//        }
+        mSortingBy = SortingBy.FAVORITES;
+        if (favorites != null) {
+            mMovies = favorites;
+        }
+        generateMovieList(mMovies);
+        mRecyclerView.getAdapter().notifyDataSetChanged();
         if (mMovies.size() < 1) {
-            Toast.makeText(getApplicationContext(), "There are currently no saved favorites", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.noSavedFavoritesMessage , Toast.LENGTH_LONG).show();
         }
     }
 
     private void loadSavedFavorites() {
-//        final LiveData<List<RetroMovie>> favoriteMovies = mDb.movieFavoritesDao().loadAllFavoriteMovies();
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.getFavorites().observe(this, new Observer<List<RetroMovie>>() {
             @Override
             public void onChanged(@Nullable List<RetroMovie> favoriteList) {
                 Log.d(TAG, "Updating list of favorites from LiveData in ViewModel");
                 mFavorites = favoriteList;
-                if (mSortingBy == SortingBy.FAVORITES){
-//                    mAdapter = new MovieAdapter(favoriteList,MainActivity.this);
-//                    mAdapter.setMovies(favoriteList);
-//                    mRecyclerView.setAdapter(mAdapter);
+
+                if (mSortingBy == SortingBy.FAVORITES) {
                     mMovies = favoriteList;
                     mFavorites = favoriteList;
                     viewFavorites(mMovies);
+
                     if (mMovies.size() < 1) {
-                        Toast.makeText(getApplicationContext(), "There are currently no saved favorites", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.noSavedFavoritesMessage, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -166,11 +164,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     public void sortByHighestRated() {
         mSortingBy = SortingBy.HIGHEST_RATED;
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        if(mHighestRated != null) {
+
+        //Only make the network call if movies are not cached
+
+        if (mHighestRated != null) {
             mMovies = mHighestRated;
             generateMovieList(mMovies);
-        }
-        else {
+        } else {
             Call<RetroMovieResults> call = service.getMoviesByRating(API_KEY);
             call.enqueue(new Callback<RetroMovieResults>() {
                 @Override
@@ -182,6 +182,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
                 @Override
                 public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+
+                    //Test to see if there is a network or configuration issue with retrofit
+
                     if (t instanceof IOException) {
                         Toast.makeText(getApplicationContext(), "There is currently no network connection", Toast.LENGTH_LONG).show();
                     } else {
@@ -192,12 +195,16 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
-    public void sortByMostPopular(){
+    public void sortByMostPopular() {
         mSortingBy = SortingBy.MOST_POPULAR;
         GetEndpointData service = RetrofitClentInstance.getRetrofitInstance().create(GetEndpointData.class);
-        if(mMostPopular != null) {
+
+        //Test to see if there is a network or configuration issue with retrofit
+
+        if (mMostPopular != null) {
             mMovies = mMostPopular;
             generateMovieList(mMovies);
+
         } else {
 
             Call<RetroMovieResults> call = service.getMoviesByPopularity(API_KEY);
@@ -211,6 +218,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
                 @Override
                 public void onFailure(Call<RetroMovieResults> call, Throwable t) {
+
+                    //Test to see if there is a network or configuration issue with retrofit
+
                     if (t instanceof IOException) {
                         Toast.makeText(getApplicationContext(), "There is currently no network connection", Toast.LENGTH_LONG).show();
                     } else {
@@ -223,13 +233,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private void generateMovieList(List<RetroMovie> movieList) {
         mRecyclerView = findViewById(R.id.recyclerView);
-        mAdapter = new MovieAdapter(movieList,this);
+        mAdapter = new MovieAdapter(movieList, this);
         mAdapter.setMovies(movieList);
         mRecyclerView.setAdapter(mAdapter);
-        mLayoutManager = new GridLayoutManager(this,2);
+        mLayoutManager = new GridLayoutManager(this, 2);
+
+        //Restore adapter to maintain scroll position
+
         if (mListState != null) {
             mLayoutManager.onRestoreInstanceState(mListState);
         }
+
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter.notifyDataSetChanged();
     }
@@ -237,9 +251,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Override
     public void onListItemClick(int clickedItemIndex) {
         final RetroMovie movie = mMovies.get(clickedItemIndex);
-        Intent intent = new Intent(this,MovieDetailActivity.class);
-        intent.putExtra("MOVIE",movie);
-        intent.putParcelableArrayListExtra(SAVED_FAVORITE_LIST,(ArrayList<RetroMovie>)mFavorites);
+        Intent intent = new Intent(this, MovieDetailActivity.class);
+        intent.putExtra("MOVIE", movie);
+        intent.putParcelableArrayListExtra(SAVED_FAVORITE_LIST, (ArrayList<RetroMovie>) mFavorites);
         this.startActivity(intent);
     }
 }

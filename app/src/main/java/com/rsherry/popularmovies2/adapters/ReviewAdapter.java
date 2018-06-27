@@ -1,4 +1,4 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.rsherry.popularmovies2.R;
 import com.rsherry.popularmovies2.model.RetroReview;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     @Override
     public ReviewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.review_list_item,parent,false);
+                .inflate(R.layout.review_list_item, parent, false);
         return new ReviewViewHolder(view);
     }
 
@@ -43,12 +44,14 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
     public class ReviewViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.author) TextView mAuthorName;
-        @BindView(R.id.review) TextView mAuthorReview;
+        @BindView(R.id.author)
+        TextView mAuthorName;
+        @BindView(R.id.review)
+        TextView mAuthorReview;
 
         public ReviewViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

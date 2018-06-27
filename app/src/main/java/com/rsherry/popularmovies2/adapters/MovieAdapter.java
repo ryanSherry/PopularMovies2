@@ -1,16 +1,16 @@
-package com.rsherry.popularmovies2;
+package com.rsherry.popularmovies2.adapters;
 
-import android.content.Context;
-import android.graphics.Movie;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.rsherry.popularmovies2.ListItemClickListener;
+import com.rsherry.popularmovies2.R;
+import com.rsherry.popularmovies2.model.RetroMovie;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -19,10 +19,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> implements ListItemClickListener {
-    List<RetroMovie> mMovies;
+    private List<RetroMovie> mMovies;
     final private ListItemClickListener mOnClickListener;
 
-    MovieAdapter(List<RetroMovie> movies,ListItemClickListener listener) {
+    public MovieAdapter(List<RetroMovie> movies, ListItemClickListener listener) {
         mMovies = movies;
         mOnClickListener = listener;
     }
@@ -31,7 +31,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.movie_list_item,parent,false);
+                .inflate(R.layout.movie_list_item, parent, false);
 
         return new MovieViewHolder(view);
 
@@ -58,11 +58,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R.id.moviePoster) ImageView mMoviePoster;
+        @BindView(R.id.moviePoster)
+        ImageView mMoviePoster;
 
         MovieViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 
