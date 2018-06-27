@@ -1,8 +1,11 @@
 package com.rsherry.popularmovies2.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class RetroTrailer {
+public class RetroTrailer implements Parcelable {
     @SerializedName("id")
     private String mId;
     @SerializedName("key")
@@ -67,4 +70,37 @@ public class RetroTrailer {
         return YOUTUBE_BASE_URL + url;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeString(mKey);
+        dest.writeString(mName);
+        dest.writeString(mSite);
+        dest.writeString(mType);
+    }
+
+    protected RetroTrailer(Parcel in) {
+        mId = in.readString();
+        mKey = in.readString();
+        mName = in.readString();
+        mSite = in.readString();
+        mType = in.readString();
+    }
+
+    public static final Creator<RetroTrailer> CREATOR = new Creator<RetroTrailer>() {
+        @Override
+        public RetroTrailer createFromParcel(Parcel in) {
+            return new RetroTrailer(in);
+        }
+
+        @Override
+        public RetroTrailer[] newArray(int size) {
+            return new RetroTrailer[size];
+        }
+    };
 }
