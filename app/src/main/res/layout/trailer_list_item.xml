@@ -16,7 +16,8 @@
         android:adjustViewBounds="true"
         android:layout_weight="1"
         android:background="@android:color/black"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        app:srcCompat="@android:drawable/ic_media_play"
+        android:contentDescription="@string/play_button" />
 
     <TextView
         android:id="@+id/trailerTitle"
